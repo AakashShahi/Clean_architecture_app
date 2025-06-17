@@ -77,7 +77,7 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
         showMySnackBar(
           context: event.context,
           message: 'Invalid credentials. Please try again.',
-          color: Colors.red,
+          color: const Color.fromARGB(255, 51, 34, 33),
         );
       },
       (token) {

@@ -62,7 +62,7 @@ class StudentHiveModel extends Equatable {
       image: entity.image,
       phone: entity.phone,
       batch: BatchHiveModel.fromEntity(entity.batch),
-      courses: CourseHiveModel.fromEntityList(entity.courses),
+      courses: CourseHiveModel.fromEntityList(entity.course),
       username: entity.username,
       password: entity.password,
     );
@@ -77,7 +77,7 @@ class StudentHiveModel extends Equatable {
       image: image,
       phone: phone,
       batch: batch.toEntity(),
-      courses: CourseHiveModel.toEntityList(courses),
+      course: CourseHiveModel.toEntityList(courses),
       username: username,
       password: password,
     );

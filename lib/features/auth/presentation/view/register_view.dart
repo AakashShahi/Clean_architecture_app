@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:student_management/features/auth/presentation/view_model/register_view_model/register_event.dart';
 import 'package:student_management/features/auth/presentation/view_model/register_view_model/register_view_model.dart';
 import 'package:student_management/features/batch/domain/entity/batch_entity.dart';
@@ -13,19 +17,56 @@ import 'package:student_management/features/course/presentation/view_model/cours
 import 'package:student_management/features/course/presentation/view_model/course_view_model.dart';
 
 @immutable
-class RegisterView extends StatelessWidget {
-  RegisterView({super.key});
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
 
+  @override
+  State<RegisterView> createState() => _RegisterViewState();
+}
+
+class _RegisterViewState extends State<RegisterView> {
   final _gap = const SizedBox(height: 8);
+
   final _key = GlobalKey<FormState>();
+
   final _fnameController = TextEditingController(text: 'kiran');
+
   final _lnameController = TextEditingController(text: 'rana');
+
   final _phoneController = TextEditingController(text: '123456789');
+
   final _usernameController = TextEditingController(text: 'kiran');
+
   final _passwordController = TextEditingController(text: 'kiran123');
 
   BatchEntity? _dropDownValue;
+
   final List<CourseEntity> _lstCourseSelected = [];
+
+  checkCameraPermissoion() async {
+    if (await Permission.camera.request().isRestricted ||
+        await Permission.camera.request().isDenied) {
+      await Permission.camera.request();
+    }
+  }
+
+  File? _img;
+  Future _browseImage(ImageSource imageSource) async {
+    try {
+      final image = await ImagePicker().pickImage(source: imageSource);
+      if (image != null) {
+        setState(() {
+          _img = File(image.path);
+          //Sen image to server
+          context.read<RegisterViewModel>().add(UploadImageEvent(file: _img!));
+        });
+      } else {
+        return;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,12 +96,22 @@ class RegisterView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               ElevatedButton.icon(
-                                onPressed: () {},
+                                onPressed: () {
+                                  checkCameraPermissoion().then((_) {
+                                    _browseImage(ImageSource.camera);
+                                  });
+                                  Navigator.pop(context);
+                                },
                                 icon: const Icon(Icons.camera),
                                 label: const Text('Camera'),
                               ),
                               ElevatedButton.icon(
-                                onPressed: () {},
+                                onPressed: () {
+                                  checkCameraPermissoion().then((_) {
+                                    _browseImage(ImageSource.gallery);
+                                  });
+                                  Navigator.pop(context);
+                                },
                                 icon: const Icon(Icons.image),
                                 label: const Text('Gallery'),
                               ),
@@ -74,13 +125,13 @@ class RegisterView extends StatelessWidget {
                       width: 200,
                       child: CircleAvatar(
                         radius: 50,
-                        // backgroundImage: _img != null
-                        //     ? FileImage(_img!)
-                        //     : const AssetImage('assets/images/profile.png')
+                        backgroundImage: _img != null
+                            ? FileImage(_img!)
+                            : const AssetImage('assets/images/profile.png')
+                                  as ImageProvider,
+                        // backgroundImage:
+                        //     const AssetImage('assets/images/profile.png')
                         //         as ImageProvider,
-                        backgroundImage:
-                            const AssetImage('assets/images/profile.png')
-                                as ImageProvider,
                       ),
                     ),
                   ),
